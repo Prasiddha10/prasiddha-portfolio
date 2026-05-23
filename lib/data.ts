@@ -187,7 +187,7 @@ export const education = [
 
 export const socials = [
   { label: "Email", href: "mailto:prasiddhaf23@gmail.com", handle: "prasiddhaf23@gmail.com" },
-  { label: "LinkedIn", href: "https://www.linkedin.com/in/prasiddha-koirala", handle: "/prasiddha-koirala" },
+  { label: "LinkedIn", href: "https://www.linkedin.com/in/prasiddhakoirala/", handle: "/prasiddhakoirala" },
   { label: "GitHub", href: "https://github.com/", handle: "@prasiddha" },
   { label: "Phone", href: "tel:+9779867665486", handle: "+977 9867665486" },
 ] as const;

@@ -67,6 +67,19 @@ cat .data/messages.jsonl
 
 The repo is plug-and-play with Vercel — no config needed.
 
+### Make the URL look professional
+
+The default Vercel subdomain is temporary and long. Add a custom domain in the Vercel dashboard
+so the site looks branded, for example:
+
+```bash
+prasiddha.com
+www.prasiddha.com
+portfolio.prasiddha.com
+```
+
+After connecting the domain, set `NEXT_PUBLIC_SITE_URL` to that final URL in Vercel.
+
 ### Option A — Vercel CLI (fastest)
 
 ```bash
