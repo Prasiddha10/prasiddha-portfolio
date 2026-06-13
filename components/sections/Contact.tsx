@@ -162,7 +162,7 @@ export default function Contact() {
             className="mt-10 max-w-xl text-ink-dim text-lg"
           >
             Open to collaborations on NLP, RAG systems, low-resource language
-            tooling, and applied AI research. Reach out — I reply.
+            tooling, and applied AI research. Reach out , I will resond to each message.
           </motion.div>
         </motion.div>
 
