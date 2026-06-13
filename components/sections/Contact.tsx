@@ -161,8 +161,8 @@ export default function Contact() {
             transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.6 }}
             className="mt-10 max-w-xl text-ink-dim text-lg"
           >
-            Open to collaborations on NLP, RAG systems, low-resource language
-            tooling, and applied AI research. Reach out , I will resond to each message.
+            Open to collaborations, research opportunities, and interesting
+            problems worth solving. Every message gets a reply.
           </motion.div>
         </motion.div>
 
