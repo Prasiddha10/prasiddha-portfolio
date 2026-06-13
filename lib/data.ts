@@ -27,7 +27,7 @@ export const experiences: Experience[] = [
     company: "AutoLab Technologies",
     location: "Kathmandu",
     desc:
-      "Promoted from AI Intern. Owning NLP pipelines end-to-end — crawling, extraction, structuring messy product data into clean JSON, and shipping a RAG search stack on OpenAI embeddings, Qdrant, and GPT-3.5.",
+      "Promoted from AI Intern. Owning NLP pipelines end-to-end ->crawling, extraction, structuring messy product data into clean JSON, and shipping a RAG search stack on OpenAI embeddings, Qdrant, and GPT-4.o.",
     tags: ["RAG", "Qdrant", "OpenAI", "Pipelines"],
   },
   {
@@ -111,15 +111,6 @@ export const projects: Project[] = [
     github: "https://github.com/",
     accent: "orange",
   },
-  {
-    name: "KU-AIcrusade Prototype",
-    year: "2023",
-    blurb: "AI + hardware for environmental monitoring",
-    body:
-      "Sensor-fusion prototype for real-time environmental monitoring with on-device anomaly detection. Cut monitoring errors by ~25% over baseline thresholds.",
-    tags: ["IoT", "Anomaly Detection", "Embedded"],
-    accent: "blue",
-  },
 ];
 
 export const skills: { category: string; items: string[]; accent: "orange" | "blue" }[] = [
@@ -133,7 +124,6 @@ export const skills: { category: string; items: string[]; accent: "orange" | "bl
       "Transformers",
       "LLaMA · LoRA",
       "RAG",
-      "BERTScore",
       "scikit-learn",
     ],
   },
@@ -145,17 +135,17 @@ export const skills: { category: string; items: string[]; accent: "orange" | "bl
   {
     category: "Backend",
     accent: "blue",
-    items: ["Python", "FastAPI", "Flask", "Node.js", "REST", "WebSockets"],
+    items: ["Python", "FastAPI", "Node.js", "REST", "WebSockets"],
   },
   {
     category: "Frontend",
     accent: "blue",
-    items: ["TypeScript", "Next.js", "React", "Tailwind", "Three.js", "Framer Motion"],
+    items: [ "Next.js", "React", "Tailwind", "Framer Motion"],
   },
   {
     category: "DevOps",
     accent: "blue",
-    items: ["Docker", "GitHub Actions", "Linux", "Nginx", "Vercel"],
+    items: ["Docker", "GitHub Actions","Vercel"],
   },
   {
     category: "Databases",
@@ -166,10 +156,10 @@ export const skills: { category: string; items: string[]; accent: "orange" | "bl
 
 export const education = [
   {
-    period: "2022 — Present",
+    period: "2022 — 2026",
     degree: "B.Tech in Artificial Intelligence",
     school: "Kathmandu University",
-    detail: "Pioneer batch · GPA 3.62",
+    detail: "Pioneer batch · CGPA 3.54",
   },
   {
     period: "2018 — 2020",
@@ -199,5 +189,4 @@ export const nav = [
   { id: "projects", label: "Projects" },
   { id: "skills", label: "Skills" },
   { id: "education", label: "Education" },
-  { id: "contact", label: "Contact" },
 ] as const;

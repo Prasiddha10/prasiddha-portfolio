@@ -33,31 +33,70 @@ export default function LoadingScreen() {
         <motion.div
           key="loader"
           initial={{ opacity: 1 }}
-          exit={{ opacity: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } }}
+          exit={{ opacity: 0, scale: 1.06, transition: { duration: 0.65, ease: [0.22, 1, 0.36, 1] } }}
           className="fixed inset-0 z-[120] flex flex-col items-center justify-center bg-bg"
         >
-          {/* gradient ring */}
-          <motion.div
-            initial={{ scale: 0.6, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-            className="relative mb-10"
-          >
-            <div
-              className="h-24 w-24 rounded-full blur-2xl opacity-70"
+          {/* glow burst — radial orb that expands from nothing */}
+          <div className="relative mb-12 h-28 w-28">
+            {/* outer expanding halo */}
+            <motion.div
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: [0, 2.8, 1.6], opacity: [0, 0.75, 0.32] }}
+              transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1], times: [0, 0.45, 1] }}
+              className="absolute inset-0 rounded-full"
               style={{
                 background:
-                  "conic-gradient(from 0deg, rgba(255,106,61,0.9), rgba(90,169,255,0.9), rgba(255,106,61,0.9))",
+                  "radial-gradient(circle, rgba(110,193,255,0.9) 0%, rgba(255,106,61,0.55) 45%, transparent 72%)",
+                filter: "blur(18px)",
               }}
             />
+            {/* mid conic ring */}
             <motion.div
-              className="absolute inset-0 grid place-items-center font-mono text-[10px] tracking-[0.3em] text-ink-dim"
-              animate={{ rotate: 360 }}
-              transition={{ duration: 2.6, repeat: Infinity, ease: "linear" }}
+              initial={{ scale: 0.2, opacity: 0 }}
+              animate={{ scale: [0.2, 1.4, 1], opacity: [0, 1, 0.55] }}
+              transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1], delay: 0.1, times: [0, 0.5, 1] }}
+              className="absolute inset-0 rounded-full"
+              style={{
+                background:
+                  "conic-gradient(from 0deg, rgba(255,106,61,0.95), rgba(90,169,255,0.95), rgba(255,106,61,0.95))",
+                filter: "blur(4px)",
+              }}
+            />
+            {/* bright core */}
+            <motion.div
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: [0, 1.3, 0.9], opacity: [0, 1, 0.85] }}
+              transition={{ duration: 0.85, ease: [0.22, 1, 0.36, 1], delay: 0.05 }}
+              className="absolute inset-[22%] rounded-full"
+              style={{
+                background: "radial-gradient(circle, #ffffff 0%, rgba(110,193,255,0.9) 50%, transparent 100%)",
+                filter: "blur(2px)",
+              }}
+            />
+            {/* spinning orbit ring — dashed, outside the orb */}
+            <motion.div
+              initial={{ scale: 0.4, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1, rotate: 360 }}
+              transition={{
+                scale:   { delay: 0.9, duration: 0.5, ease: [0.22, 1, 0.36, 1] },
+                opacity: { delay: 0.9, duration: 0.4 },
+                rotate:  { delay: 0.9, duration: 3.5, repeat: Infinity, ease: "linear" },
+              }}
+              className="absolute -inset-5 rounded-full"
+              style={{
+                border: "1px dashed rgba(110,193,255,0.35)",
+              }}
+            />
+            {/* LOAD label — sits at top of orbit ring */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.0, duration: 0.5 }}
+              className="absolute -top-8 left-1/2 -translate-x-1/2 font-mono text-[9px] tracking-[0.35em] uppercase text-ink-dim"
             >
-              <span>LOAD</span>
+              LOAD
             </motion.div>
-          </motion.div>
+          </div>
 
           {/* huge name */}
           <motion.div

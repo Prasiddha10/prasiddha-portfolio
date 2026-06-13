@@ -40,22 +40,22 @@ export default function Cursor() {
   return (
     <>
       <motion.div
-        className="pointer-events-none fixed top-0 left-0 z-[100] -translate-x-1/2 -translate-y-1/2 mix-blend-difference"
-        style={{ x: sx, y: sy }}
+        className="pointer-events-none fixed top-0 left-0 z-[100] -translate-x-1/2 -translate-y-1/2"
+        style={{ x: sx, y: sy, willChange: "transform" }}
       >
         <motion.span
-          className="block rounded-full bg-white"
+          className="block rounded-full border border-white/70"
           animate={{
-            width: hovering ? 56 : 10,
-            height: hovering ? 56 : 10,
-            opacity: hovering ? 0.85 : 1,
+            width: hovering ? 56 : 32,
+            height: hovering ? 56 : 32,
+            opacity: hovering ? 0.9 : 0.55,
           }}
           transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
         />
       </motion.div>
       <motion.div
         className="pointer-events-none fixed top-0 left-0 z-[99] -translate-x-1/2 -translate-y-1/2"
-        style={{ x, y }}
+        style={{ x, y, willChange: "transform" }}
       >
         <span
           className="block h-1.5 w-1.5 rounded-full bg-orange"

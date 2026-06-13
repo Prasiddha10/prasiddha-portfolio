@@ -6,11 +6,10 @@ import Lenis from "lenis";
 export default function LenisProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const lenis = new Lenis({
-      duration: 1.15,
-      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      duration: 0.82,
+      easing: (t: number) => 1 - Math.pow(1 - t, 3),
       smoothWheel: true,
-      lerp: 0.1,
-      wheelMultiplier: 1,
+      wheelMultiplier: 1.1,
     });
 
     document.documentElement.classList.add("lenis", "lenis-smooth");

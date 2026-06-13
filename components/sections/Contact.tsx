@@ -217,7 +217,6 @@ export default function Contact() {
 
         <footer className="mt-24 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-t border-line pt-8 font-mono text-[11px] tracking-[0.08em] uppercase text-ink-mute">
           <span>© {new Date().getFullYear()} {profile.name}</span>
-          <span>Crafted with care · Kathmandu, Nepal</span>
           <a href="#home" data-cursor="hover" className="hover:text-ink transition-colors">
             Back to top ↑
           </a>

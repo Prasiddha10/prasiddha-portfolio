@@ -1,185 +1,367 @@
 "use client";
 
-import dynamic from "next/dynamic";
-import { motion, useScroll, useTransform } from "framer-motion";
+import {
+  motion,
+  useMotionValue,
+  useSpring,
+  useTransform,
+  useScroll,
+} from "framer-motion";
 import { useEffect, useRef } from "react";
-import gsap from "gsap";
-import MagneticButton from "@/components/ui/MagneticButton";
 import { profile } from "@/lib/data";
 
-const HeroScene = dynamic(() => import("@/components/three/HeroScene"), {
-  ssr: false,
-  loading: () => (
-    <div className="absolute inset-0 grid place-items-center">
-      <div className="h-40 w-40 rounded-full bg-gradient-to-br from-orange/40 to-blue/40 blur-3xl animate-pulse" />
-    </div>
-  ),
-});
-
-const NAME_LINES = ["PRASIDDHA", "KOIRALA"];
+const EASE = [0.22, 1, 0.36, 1] as const;
+const NEON_BLUE = "#7cc0ff";
+const CHIPS = ["Python", "NLP", "LLMs", "PyTorch", "Next.js"] as const;
 
 export default function Hero() {
-  const ref = useRef<HTMLElement>(null);
-  const rootRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
 
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
-  const yBgText = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
-  const opacity = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
-  const sceneScale = useTransform(scrollYProgress, [0, 1], [1, 1.18]);
-  const sceneY = useTransform(scrollYProgress, [0, 1], ["0%", "10%"]);
+  // ─── cursor parallax (drives glow + character tilt) ───
+  const mx = useMotionValue(0);
+  const my = useMotionValue(0);
+  const smx = useSpring(mx, { stiffness: 60, damping: 22 });
+  const smy = useSpring(my, { stiffness: 60, damping: 22 });
 
-  // GSAP cinematic intro timeline (runs once after loader removes)
+  // glow blob follows cursor via translate (transform only — no gradient re-string per frame)
+  const glowX = useTransform(smx, [-1, 1], ["-22%", "22%"]);
+  const glowY = useTransform(smy, [-1, 1], ["-22%", "22%"]);
+
   useEffect(() => {
-    if (!rootRef.current) return;
-    const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ defaults: { ease: "expo.out" }, delay: 1.55 });
+    const el = sectionRef.current;
+    if (!el) return;
+    let raf = 0;
+    let nx = 0, ny = 0;
+    // throttle to one update per frame — pointermove fires far faster than 60fps
+    const onMove = (e: PointerEvent) => {
+      const r = el.getBoundingClientRect();
+      nx = ((e.clientX - r.left) / r.width) * 2 - 1;
+      ny = ((e.clientY - r.top) / r.height) * 2 - 1;
+      if (!raf) {
+        raf = requestAnimationFrame(() => {
+          mx.set(nx);
+          my.set(ny);
+          raf = 0;
+        });
+      }
+    };
+    el.addEventListener("pointermove", onMove, { passive: true });
+    return () => {
+      el.removeEventListener("pointermove", onMove);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, [mx, my]);
 
-      tl.from(".hero-eyebrow", { y: -12, opacity: 0, duration: 1 }, 0)
-        .from(
-          ".hero-bg-line",
-          {
-            y: 60,
-            opacity: 0,
-            filter: "blur(20px)",
-            scale: 1.06,
-            duration: 1.4,
-            stagger: 0.12,
-          },
-          0.05
-        )
-        .from(".hero-status", { y: 14, opacity: 0, duration: 0.8 }, 0.4)
-        .from(".hero-tagline", { y: 18, opacity: 0, filter: "blur(8px)", duration: 1.1 }, 0.6)
-        .from(".hero-cta > *", { y: 18, opacity: 0, duration: 0.7, stagger: 0.08 }, 0.85)
-        .from(".hero-scroll", { y: 10, opacity: 0, duration: 0.8 }, 1.1);
-    }, rootRef);
-    return () => ctx.revert();
-  }, []);
+  // ─── scroll-driven transition to next section ───
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start start", "end start"],
+  });
+  const textOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
+  const textY       = useTransform(scrollYProgress, [0, 1], [0, -50]);
+  const charY       = useTransform(scrollYProgress, [0, 1], [0, -90]);
+  const charOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
+  const charScale   = useTransform(scrollYProgress, [0, 1], [1, 0.86]);
+  const bgOverlayOpacity = useTransform(scrollYProgress, [0, 1], [0, 1]);
 
   return (
     <section
       id="home"
-      ref={ref}
+      ref={sectionRef}
       className="relative min-h-[100svh] w-full overflow-hidden"
     >
-      <div ref={rootRef} className="relative h-full w-full">
-        {/* ─── huge background name ─── */}
+      {/* ── deep space background ── */}
+      <div
+        aria-hidden
+        className="absolute inset-0 z-0"
+        style={{
+          background:
+            "radial-gradient(ellipse at 65% 45%, #0c1226 0%, #070a18 45%, #020308 100%)",
+        }}
+      />
+
+      {/* ── mouse-follow glow (moves via transform — cheap) ── */}
+      <motion.div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 z-[1] flex items-center justify-center"
+      >
         <motion.div
-          style={{ y: yBgText, opacity }}
-          className="pointer-events-none absolute inset-0 z-[1] flex flex-col items-center justify-center gap-[0.05em]"
+          className="h-[120vmax] w-[120vmax] rounded-full"
+          style={{
+            x: glowX,
+            y: glowY,
+            willChange: "transform",
+            background:
+              "radial-gradient(circle at 50% 50%, rgba(110,193,255,0.13) 0%, rgba(255,106,177,0.05) 30%, transparent 55%)",
+          }}
+        />
+      </motion.div>
+
+      {/* ── grain + scroll overlay ── */}
+      <GrainNoise />
+      <motion.div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 z-[2]"
+        style={{
+          opacity: bgOverlayOpacity,
+          willChange: "opacity",
+          background:
+            "linear-gradient(180deg, rgba(8,12,22,0) 0%, rgba(20,28,48,1) 100%)",
+        }}
+      />
+
+      {/* ── ANIMATED VISUAL — orbital rings on the right (CSS only, no lag) ── */}
+      <motion.div
+        style={{
+          y: charY,
+          scale: charScale,
+          opacity: charOpacity,
+          willChange: "transform",
+        }}
+        className="pointer-events-none absolute inset-y-0 right-0 z-[3] hidden w-[48%] items-center justify-center lg:flex"
+      >
+        <OrbitalVisual />
+      </motion.div>
+
+      {/* ── text content ── */}
+      <motion.div
+        style={{ opacity: textOpacity, y: textY, willChange: "transform" }}
+        className="relative z-[5] flex min-h-[100svh] w-full flex-col justify-center px-8 py-28 md:px-16 xl:px-24"
+      >
+        <h1 className="sr-only">{profile.name} — {profile.role}</h1>
+
+        {/* label */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.7, ease: EASE }}
+          className="mb-6 flex items-center gap-3 font-mono text-[10px] tracking-[0.42em] uppercase text-ink-mute"
         >
-          {NAME_LINES.map((line, i) => (
-            <div
-              key={line}
-              className="hero-bg-line font-display font-black tracking-[-0.06em] leading-[0.85] text-[16vw] md:text-[14vw] lg:text-[13vw] whitespace-nowrap select-none"
-              style={{
-                WebkitTextStroke: "1px rgba(255,255,255,0.16)",
-                color: "transparent",
-                textShadow:
-                  i === 0
-                    ? "0 0 80px rgba(90,169,255,0.25)"
-                    : "0 0 80px rgba(255,106,61,0.22)",
-              }}
+          <span className="h-px w-8 bg-line-strong" />
+          <span>AI Engineer · Researcher</span>
+        </motion.div>
+
+        {/* name + role */}
+        <motion.div
+          initial={{ x: -180, opacity: 0, filter: "blur(18px)" }}
+          animate={{ x: 0, opacity: 1, filter: "blur(0px)" }}
+          transition={{ delay: 0.35, duration: 1.1, ease: EASE }}
+          aria-hidden
+          className="select-none"
+        >
+          <div
+            className="font-display font-black leading-[0.86] tracking-[-0.045em] text-[clamp(52px,8vw,124px)]"
+            style={{
+              color: NEON_BLUE,
+              textShadow: "0 1px 24px rgba(110,193,255,0.22)",
+            }}
+          >
+            PRASIDDHA
+          </div>
+          <div
+            className="mt-2 font-display font-light leading-[0.9] tracking-[0.02em] text-[clamp(22px,3.2vw,52px)]"
+            style={{ color: "rgba(255,255,255,0.82)" }}
+          >
+            {profile.role}
+          </div>
+        </motion.div>
+
+        {/* tagline */}
+        <motion.p
+          initial={{ opacity: 0, y: 14, filter: "blur(8px)" }}
+          animate={{ opacity: 1, y: 0, filter: "blur(0)" }}
+          transition={{ delay: 0.7, duration: 1.0, ease: EASE }}
+          className="mt-6 max-w-md font-display text-[15px] leading-relaxed text-ink-dim md:text-[17px]"
+        >
+          {profile.tagline}
+        </motion.p>
+
+        {/* tech chips */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.9, duration: 0.8, ease: EASE }}
+          className="mt-5 flex flex-wrap gap-2"
+        >
+          {CHIPS.map((t) => (
+            <span
+              key={t}
+              className="rounded-full border border-white/[0.09] bg-white/[0.04] px-3 py-1 font-mono text-[10px] tracking-[0.14em] uppercase text-ink-mute"
             >
-              {line}
-            </div>
+              {t}
+            </span>
           ))}
         </motion.div>
 
-        {/* ─── 3D scene layer ─── */}
+        {/* CTA buttons */}
         <motion.div
-          style={{ scale: sceneScale, y: sceneY }}
-          className="absolute inset-0 z-[2]"
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.1, duration: 0.8, ease: EASE }}
+          className="mt-8 flex flex-wrap items-center gap-4"
         >
-          <HeroScene />
+          {/* Primary — glowing gradient pill */}
+          <a
+            href="#projects"
+            data-cursor="hover"
+            className="group relative inline-flex items-center gap-3 overflow-hidden rounded-full px-8 py-3.5 font-display text-[13px] font-semibold tracking-wide text-white transition-transform duration-200 ease-out hover:scale-[1.06]"
+            style={{
+              background:
+                "linear-gradient(135deg, #4f9eff 0%, #6EC1FF 42%, #b794f4 100%)",
+              boxShadow:
+                "0 0 0 1px rgba(255,255,255,0.18) inset, 0 8px 36px rgba(110,193,255,0.32), 0 2px 8px rgba(0,0,0,0.45)",
+            }}
+          >
+            <span>View Projects</span>
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/25 text-[13px] transition-transform duration-200 group-hover:translate-x-0.5">
+              →
+            </span>
+          </a>
+
+          {/* Secondary — gradient-border glass pill */}
+          <div
+            className="rounded-full p-px"
+            style={{
+              background:
+                "linear-gradient(135deg, rgba(110,193,255,0.55) 0%, rgba(183,148,244,0.3) 50%, rgba(255,255,255,0.08) 100%)",
+            }}
+          >
+            <a
+              href="#contact"
+              data-cursor="hover"
+              className="group inline-flex items-center gap-2.5 rounded-full px-8 py-3.5 font-display text-[13px] font-medium tracking-wide text-white/80 backdrop-blur-md transition-transform duration-200 ease-out hover:text-white hover:scale-[1.04]"
+              style={{ background: "rgba(4,6,14,0.88)" }}
+            >
+              Contact Me
+              <span className="text-[15px] leading-none text-white/40 transition-transform duration-200 group-hover:text-white/90 group-hover:translate-x-0.5">
+                ↗
+              </span>
+            </a>
+          </div>
         </motion.div>
 
-        {/* ─── top eyebrow ─── */}
-        <div className="hero-eyebrow pointer-events-none absolute left-1/2 top-[14vh] z-[3] -translate-x-1/2 flex items-center gap-3 font-mono text-[10px] tracking-[0.5em] uppercase text-ink-mute">
-          <span className="h-px w-8 bg-line-strong" />
-          <span>AI Engineer · Researcher</span>
-          <span className="h-px w-8 bg-line-strong" />
+
+      </motion.div>
+
+      {/* ── scroll indicator ── */}
+      <motion.div
+        style={{ opacity: textOpacity }}
+        className="pointer-events-none absolute bottom-6 left-1/2 z-[6] -translate-x-1/2 flex flex-col items-center gap-2 font-mono text-[10px] tracking-[0.4em] uppercase text-ink-mute"
+      >
+        <span>scroll</span>
+        <div className="relative h-12 w-px overflow-hidden bg-white/10">
+          <motion.div
+            className="absolute inset-x-0 top-0 h-1/2"
+            style={{
+              background: `linear-gradient(180deg, transparent, ${NEON_BLUE})`,
+            }}
+            animate={{ y: ["-100%", "200%"] }}
+            transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+          />
         </div>
-
-        {/* ─── center stack ─── */}
-        <div className="relative z-[3] mx-auto flex min-h-[100svh] max-w-7xl flex-col items-center justify-end gap-7 px-6 pb-[14vh] text-center">
-          <h1 className="sr-only">
-            {profile.name} — {profile.role}
-          </h1>
-
-          <div className="hero-status glass rounded-full px-5 py-2 font-mono text-[11px] tracking-[0.25em] uppercase text-ink-dim flex items-center gap-3">
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inset-0 rounded-full bg-orange animate-ping opacity-60" />
-              <span className="relative h-2 w-2 rounded-full bg-orange" />
-            </span>
-            Open to collaborations
-          </div>
-
-          <p className="hero-tagline max-w-2xl font-display text-lg md:text-xl leading-relaxed text-ink-dim">
-            {profile.tagline}
-          </p>
-
-          <div className="hero-cta flex flex-wrap items-center justify-center gap-3">
-            <NeonButton href="#projects" variant="primary">
-              View Projects
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden>
-                <path
-                  d="M3 7h8m0 0L7 3m4 4l-4 4"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </NeonButton>
-            <NeonButton href="#contact" variant="ghost">
-              Contact Me
-            </NeonButton>
-          </div>
-        </div>
-
-        {/* ─── scroll cue ─── */}
-        <div className="hero-scroll pointer-events-none absolute bottom-6 left-1/2 z-[3] -translate-x-1/2 flex flex-col items-center gap-2 font-mono text-[10px] tracking-[0.4em] uppercase text-ink-mute">
-          <span>scroll</span>
-          <div className="relative h-12 w-px overflow-hidden bg-white/10">
-            <motion.div
-              className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-transparent to-white"
-              animate={{ y: ["-100%", "200%"] }}
-              transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
-            />
-          </div>
-        </div>
-      </div>
+        <span
+          className="h-1.5 w-1.5 rounded-full"
+          style={{ background: NEON_BLUE, boxShadow: `0 0 12px ${NEON_BLUE}` }}
+        />
+      </motion.div>
     </section>
   );
 }
 
-/* ───────── Neon CTA — magnetic + glow border ───────── */
-function NeonButton({
-  href,
-  variant,
-  children,
-}: {
-  href: string;
-  variant: "primary" | "ghost";
-  children: React.ReactNode;
-}) {
+/* ─────────────────────────────────────────────────────────────
+   ORBITAL VISUAL — pure CSS/transform animation. Only `rotate`
+   transforms are animated (GPU-composited, no layout, no JS per
+   frame), so it stays buttery smooth. A glowing core with three
+   tilted orbital rings, each carrying an orbiting node.
+   ───────────────────────────────────────────────────────────── */
+function OrbitalVisual() {
+  // palette matches site tokens: blue (#5aa9ff/#7cc0ff) + orange (#ff6a3d/#ff8a5b)
+  const rings = [
+    { size: 460, dur: 26, dir: 1,  tilt: 68, node: "#7cc0ff" },
+    { size: 340, dur: 18, dir: -1, tilt: 74, node: "#5aa9ff" },
+    { size: 230, dur: 12, dir: 1,  tilt: 80, node: "#ff6a3d" },
+  ];
+
   return (
-    <div className="relative">
-      {/* animated gradient ring */}
-      <span
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ delay: 0.4, duration: 1.2, ease: EASE }}
+      className="relative flex h-[560px] w-[560px] items-center justify-center"
+      style={{ perspective: 900 }}
+    >
+      {/* ambient glow behind — blue core with a warm orange edge */}
+      <div
         aria-hidden
-        className="pointer-events-none absolute -inset-[2px] rounded-full opacity-70 blur-md transition-opacity duration-500 group-hover:opacity-100"
+        className="absolute inset-0 rounded-full blur-[70px]"
         style={{
           background:
-            variant === "primary"
-              ? "conic-gradient(from 0deg, #ff6a3d, #ff8a5b, #5aa9ff, #ff6a3d)"
-              : "conic-gradient(from 180deg, transparent 40%, rgba(255,255,255,0.6), transparent 60%)",
-          maskImage: "radial-gradient(circle, black 70%, transparent 71%)",
+            "radial-gradient(circle at 50% 50%, rgba(90,169,255,0.18) 0%, rgba(255,106,61,0.07) 45%, transparent 70%)",
         }}
       />
-      <MagneticButton as="a" href={href} variant={variant} className="relative">
-        {children}
-      </MagneticButton>
-    </div>
+
+      {/* glowing core */}
+      <motion.div
+        className="absolute h-24 w-24 rounded-full"
+        style={{
+          background:
+            "radial-gradient(circle at 38% 34%, #d6ecff 0%, #7cc0ff 36%, #5aa9ff 64%, #2c5aa0 100%)",
+          boxShadow:
+            "0 0 60px 6px rgba(90,169,255,0.5), 0 0 120px 24px rgba(90,169,255,0.16)",
+        }}
+        animate={{ scale: [1, 1.06, 1] }}
+        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+      />
+
+      {/* orbital rings */}
+      {rings.map((r, i) => (
+        <div
+          key={i}
+          className="absolute"
+          style={{
+            transform: `rotateX(${r.tilt}deg)`,
+            transformStyle: "preserve-3d",
+          }}
+        >
+          <motion.div
+            className="rounded-full border"
+            style={{
+              width: r.size,
+              height: r.size,
+              borderColor: "rgba(255,255,255,0.10)",
+              borderWidth: 1,
+              willChange: "transform",
+            }}
+            animate={{ rotate: r.dir * 360 }}
+            transition={{ duration: r.dur, repeat: Infinity, ease: "linear" }}
+          >
+            {/* orbiting node */}
+            <span
+              className="absolute left-1/2 top-0 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full"
+              style={{
+                background: r.node,
+                boxShadow: `0 0 16px 3px ${r.node}`,
+              }}
+            />
+          </motion.div>
+        </div>
+      ))}
+    </motion.div>
+  );
+}
+
+/* ─── Film-grain overlay — baked into a tiled data-URI so the
+   feTurbulence filter is rasterized ONCE by the browser instead
+   of recomputed every frame over the full viewport. ─── */
+const GRAIN_URI =
+  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")";
+
+function GrainNoise() {
+  return (
+    <div
+      aria-hidden
+      className="pointer-events-none absolute inset-0 z-[3] opacity-[0.07] mix-blend-overlay"
+      style={{ backgroundImage: GRAIN_URI, backgroundRepeat: "repeat" }}
+    />
   );
 }

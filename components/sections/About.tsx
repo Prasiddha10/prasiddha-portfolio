@@ -67,9 +67,9 @@ export default function About() {
           </h3>
 
           <div className="mt-24 grid gap-10 md:grid-cols-3 border-t border-line pt-12">
-            <Meta label="Currently" title={profile.role} sub="6 months · Kathmandu, Nepal" />
+            <Meta label="Currently" title={profile.role} sub="8 months · Kathmandu, Nepal" />
             <Meta label="Focus" title="NLP · RAG · Low-resource Nepali" sub="OCR pipelines, embeddings, evaluation" />
-            <Meta label="Studying" title="B.Tech in AI" sub="Kathmandu University · Pioneer Batch · GPA 3.62" />
+            <Meta label="Completed Bachelor's in" title="B.Tech in AI" sub="Kathmandu University · Pioneer Batch · CGPA 3.54" />
           </div>
         </div>
       </div>

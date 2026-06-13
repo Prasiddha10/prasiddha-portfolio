@@ -76,7 +76,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${inter.variable} ${jetbrains.variable} ${anton.variable}`}>
-      <body className="bg-bg text-ink antialiased">
+      <body className="bg-bg text-ink antialiased" suppressHydrationWarning>
         <Providers>{children}</Providers>
       </body>
     </html>
