@@ -27,7 +27,7 @@ export const experiences: Experience[] = [
     company: "AutoLab Technologies",
     location: "Kathmandu",
     desc:
-      "Promoted from AI Intern. Owning NLP pipelines end-to-end ->crawling, extraction, structuring messy product data into clean JSON, and shipping a RAG search stack on OpenAI embeddings, Qdrant, and GPT-4.o.",
+      "Promoted from AI Intern. Owning NLP pipelines end-to-end — crawling, extraction, structuring messy product data into clean JSON, and shipping a RAG search stack on OpenAI embeddings, Qdrant, and GPT-4o.",
     tags: ["RAG", "Qdrant", "OpenAI", "Pipelines"],
   },
   {
@@ -77,7 +77,7 @@ export const projects: Project[] = [
     body:
       "16K-entry Nepali legal QA dataset + OCR ingest + Chroma/Pinecone vector search + a fine-tuned LLaMA. BERTScore F1 0.82 / 0.77 / 0.71 (simple / moderate / complex). Paper submitted to ACL ARR 2025.",
     tags: ["RAG", "LLaMA", "OCR", "ACL ARR 2025"],
-    github: "https://github.com/",
+    github: "https://github.com/Prasiddha10",
     featured: true,
     accent: "orange",
   },
@@ -88,7 +88,7 @@ export const projects: Project[] = [
     body:
       "Trained an ensemble for short-window market direction prediction, integrating macro signals and order-book features. Deployed as a backtesting + paper-trading service.",
     tags: ["Time Series", "Ensembles", "Backtesting"],
-    github: "https://github.com/",
+    github: "https://github.com/Prasiddha10",
     accent: "blue",
   },
   {
@@ -98,7 +98,7 @@ export const projects: Project[] = [
     body:
       "End-to-end detection pipeline on CCTV streams: YOLO-family backbone, on-device inference, secure event channel. Used in a campus-security workflow.",
     tags: ["YOLO", "OpenCV", "Edge"],
-    github: "https://github.com/",
+    github: "https://github.com/Prasiddha10",
     accent: "blue",
   },
   {
@@ -108,49 +108,58 @@ export const projects: Project[] = [
     body:
       "Live face-recognition kiosk with anti-spoofing, attendance log, and admin dashboard. Cut manual-roll-call errors by ~20%.",
     tags: ["OpenCV", "Mediapipe", "Python"],
-    github: "https://github.com/",
+    github: "https://github.com/Prasiddha10",
     accent: "orange",
   },
 ];
 
-export const skills: { category: string; items: string[]; accent: "orange" | "blue" }[] = [
+export type SkillItem = string | { name: string; primary?: boolean };
+export const skills: { category: string; items: SkillItem[]; accent: "orange" | "blue" }[] = [
   {
     category: "AI / ML",
     accent: "orange",
     items: [
-      "PyTorch",
+      { name: "PyTorch", primary: true },
       "TensorFlow",
       "Keras",
       "Transformers",
       "LLaMA · LoRA",
-      "RAG",
+      { name: "RAG", primary: true },
       "scikit-learn",
     ],
   },
   {
     category: "NLP",
     accent: "orange",
-    items: ["Embeddings", "Qdrant", "Chroma", "Pinecone", "OpenAI API", "OCR", "Tokenizers"],
+    items: [
+      { name: "Embeddings", primary: true },
+      { name: "Qdrant", primary: true },
+      "Chroma",
+      "Pinecone",
+      "OpenAI API",
+      "OCR",
+      "Tokenizers",
+    ],
   },
   {
     category: "Backend",
     accent: "blue",
-    items: ["Python", "FastAPI", "Node.js", "REST", "WebSockets"],
+    items: [{ name: "Python", primary: true }, { name: "FastAPI", primary: true }, "Node.js", "REST", "WebSockets"],
   },
   {
     category: "Frontend",
     accent: "blue",
-    items: [ "Next.js", "React", "Tailwind", "Framer Motion"],
+    items: [{ name: "Next.js", primary: true }, { name: "React", primary: true }, "Tailwind", "Framer Motion"],
   },
   {
     category: "DevOps",
     accent: "blue",
-    items: ["Docker", "GitHub Actions","Vercel"],
+    items: [{ name: "Docker", primary: true }, "GitHub Actions", "Vercel"],
   },
   {
     category: "Databases",
     accent: "blue",
-    items: ["PostgreSQL", "SQLite", "Redis", "Vector DBs"],
+    items: [{ name: "Vector DBs", primary: true }, "PostgreSQL", "SQLite", "Redis"],
   },
 ];
 
@@ -178,7 +187,7 @@ export const education = [
 export const socials = [
   { label: "Email", href: "mailto:prasiddhaf23@gmail.com", handle: "prasiddhaf23@gmail.com" },
   { label: "LinkedIn", href: "https://www.linkedin.com/in/prasiddhakoirala/", handle: "/prasiddhakoirala" },
-  { label: "GitHub", href: "https://github.com/", handle: "@prasiddha" },
+  { label: "GitHub", href: "https://github.com/Prasiddha10", handle: "@Prasiddha10" },
   { label: "Phone", href: "tel:+9779867665486", handle: "+977 9867665486" },
 ] as const;
 

@@ -12,6 +12,7 @@ export default function Education() {
         <SectionHeader
           index="05"
           eyebrow="Education"
+          accent="cool"
           title={
             <>
               Where I <span className="text-gradient-cool">learned.</span>
@@ -21,7 +22,7 @@ export default function Education() {
 
         <ul className="divide-y divide-line border-y border-line">
           {education.map((e, i) => (
-            <Row key={e.degree + i} entry={e} index={i} total={education.length} />
+            <Row key={e.degree + i} entry={e} index={i} />
           ))}
         </ul>
       </div>
@@ -35,7 +36,6 @@ function Row({
 }: {
   entry: (typeof education)[number];
   index: number;
-  total: number;
 }) {
   const ref = useRef<HTMLLIElement>(null);
   const inView = useInView(ref, { once: true, margin: "-15% 0px" });
@@ -64,7 +64,7 @@ function Row({
       </div>
 
       <div className="relative">
-        <h3 className="font-display text-3xl md:text-5xl font-extrabold tracking-tight">
+        <h3 className="display-md">
           <span className="block overflow-hidden">
             <motion.span
               className="inline-block"

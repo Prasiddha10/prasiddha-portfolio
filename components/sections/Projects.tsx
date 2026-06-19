@@ -1,6 +1,13 @@
 "use client";
 
-import { motion, useInView, useMotionValue, useSpring, useTransform } from "framer-motion";
+import {
+  motion,
+  useInView,
+  useMotionValue,
+  useSpring,
+  useTransform,
+  useReducedMotion,
+} from "framer-motion";
 import { useRef } from "react";
 import SectionHeader from "@/components/ui/SectionHeader";
 import { projects, type Project } from "@/lib/data";
@@ -33,19 +40,16 @@ export default function Projects() {
 function ProjectCard({ project, index }: { project: Project; index: number }) {
   const ref = useRef<HTMLElement>(null);
   const inView = useInView(ref, { once: true, margin: "-10% 0px" });
+  const reduce = useReducedMotion();
+  const raf = useRef(0);
 
-  // hover spotlight follows mouse
+  // hover spotlight follows mouse via composited transform on a static gradient sprite
   const mx = useMotionValue(0);
   const my = useMotionValue(0);
   const sx = useSpring(mx, { stiffness: 200, damping: 25 });
   const sy = useSpring(my, { stiffness: 200, damping: 25 });
-  const bg = useTransform(
-    [sx, sy] as const,
-    ([x, y]: number[]) =>
-      `radial-gradient(280px circle at ${x}px ${y}px, ${
-        project.accent === "blue" ? "rgba(90,169,255,0.18)" : "rgba(255,106,61,0.20)"
-      }, transparent 60%)`
-  );
+  const tx = useTransform(sx, (x) => x - 140);
+  const ty = useTransform(sy, (y) => y - 140);
 
   const span = project.featured ? "md:col-span-4" : "md:col-span-3";
   const ring = project.accent === "blue" ? "hover:border-blue/40" : "hover:border-orange/45";
@@ -56,25 +60,42 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
       initial={{ opacity: 0, y: 30 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: index * 0.06 }}
-      onPointerMove={(e) => {
-        const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
-        mx.set(e.clientX - r.left);
-        my.set(e.clientY - r.top);
-      }}
+      onPointerMove={
+        reduce
+          ? undefined
+          : (e) => {
+              const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
+              const nx = e.clientX - r.left;
+              const ny = e.clientY - r.top;
+              if (!raf.current) {
+                raf.current = requestAnimationFrame(() => {
+                  mx.set(nx);
+                  my.set(ny);
+                  raf.current = 0;
+                });
+              }
+            }
+      }
       className={cn(
-        "group relative overflow-hidden rounded-3xl border border-line bg-[#0c0d11]/60 backdrop-blur-md transition-all duration-500",
+        "group relative overflow-hidden rounded-3xl border border-line bg-[#0c0d11]/85 transition-all duration-500",
         ring,
         span,
         "hover:-translate-y-1"
       )}
-      data-cursor="hover"
     >
-      {/* spotlight */}
-      <motion.div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-        style={{ background: bg }}
-      />
+      {/* spotlight — static gradient sprite moved by transform */}
+      {!reduce && (
+        <motion.div
+          aria-hidden
+          style={{ x: tx, y: ty, willChange: "transform" }}
+          className={cn(
+            "pointer-events-none absolute left-0 top-0 h-[280px] w-[280px] rounded-full opacity-0 transition-opacity duration-500 group-hover:opacity-100",
+            project.accent === "blue"
+              ? "bg-[radial-gradient(circle,rgba(90,169,255,0.18),transparent_60%)]"
+              : "bg-[radial-gradient(circle,rgba(255,106,61,0.20),transparent_60%)]"
+          )}
+        />
+      )}
 
       {/* gradient corner */}
       <div
@@ -121,10 +142,10 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
                 href={project.demo}
                 target="_blank"
                 rel="noopener noreferrer"
-                data-cursor="hover"
-                className="font-mono text-[11px] tracking-[0.18em] uppercase rounded-full px-4 py-2 bg-white text-bg hover:bg-orange hover:text-white transition-colors"
+                className="group/btn inline-flex items-center justify-center gap-1.5 min-h-[44px] font-mono text-[11px] tracking-[0.18em] uppercase rounded-full px-4 py-2 bg-white text-bg hover:bg-orange hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue/60"
               >
-                Live →
+                Live
+                <span className="transition-transform duration-300 group-hover/btn:translate-x-0.5">→</span>
               </a>
             )}
             {project.github && (
@@ -132,8 +153,7 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
                 href={project.github}
                 target="_blank"
                 rel="noopener noreferrer"
-                data-cursor="hover"
-                className="font-mono text-[11px] tracking-[0.18em] uppercase rounded-full px-4 py-2 border border-line-strong hover:border-white transition-colors"
+                className="inline-flex items-center justify-center min-h-[44px] font-mono text-[11px] tracking-[0.18em] uppercase rounded-full px-4 py-2 border border-line-strong hover:border-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue/60"
               >
                 GitHub
               </a>

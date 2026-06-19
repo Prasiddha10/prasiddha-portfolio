@@ -6,6 +6,7 @@ import {
   useSpring,
   useTransform,
   useScroll,
+  useReducedMotion,
 } from "framer-motion";
 import { useEffect, useRef } from "react";
 import { profile } from "@/lib/data";
@@ -16,23 +17,22 @@ const CHIPS = ["Python", "NLP", "LLMs", "PyTorch", "Next.js"] as const;
 
 export default function Hero() {
   const sectionRef = useRef<HTMLElement>(null);
+  const reduce = useReducedMotion();
 
-  // ─── cursor parallax (drives glow + character tilt) ───
+  // ─── cursor parallax (drives glow) ───
   const mx = useMotionValue(0);
   const my = useMotionValue(0);
   const smx = useSpring(mx, { stiffness: 60, damping: 22 });
   const smy = useSpring(my, { stiffness: 60, damping: 22 });
-
-  // glow blob follows cursor via translate (transform only — no gradient re-string per frame)
   const glowX = useTransform(smx, [-1, 1], ["-22%", "22%"]);
   const glowY = useTransform(smy, [-1, 1], ["-22%", "22%"]);
 
   useEffect(() => {
+    if (reduce) return;
     const el = sectionRef.current;
     if (!el) return;
     let raf = 0;
     let nx = 0, ny = 0;
-    // throttle to one update per frame — pointermove fires far faster than 60fps
     const onMove = (e: PointerEvent) => {
       const r = el.getBoundingClientRect();
       nx = ((e.clientX - r.left) / r.width) * 2 - 1;
@@ -50,7 +50,7 @@ export default function Hero() {
       el.removeEventListener("pointermove", onMove);
       if (raf) cancelAnimationFrame(raf);
     };
-  }, [mx, my]);
+  }, [mx, my, reduce]);
 
   // ─── scroll-driven transition to next section ───
   const { scrollYProgress } = useScroll({
@@ -92,7 +92,7 @@ export default function Hero() {
             y: glowY,
             willChange: "transform",
             background:
-              "radial-gradient(circle at 50% 50%, rgba(110,193,255,0.13) 0%, rgba(255,106,177,0.05) 30%, transparent 55%)",
+              "radial-gradient(circle at 50% 50%, rgba(124,192,255,0.13) 0%, rgba(255,106,177,0.05) 30%, transparent 55%)",
           }}
         />
       </motion.div>
@@ -110,7 +110,7 @@ export default function Hero() {
         }}
       />
 
-      {/* ── ANIMATED VISUAL — orbital rings on the right (CSS only, no lag) ── */}
+      {/* ── ANIMATED VISUAL — orbital rings; visible from md, subtle on tablet ── */}
       <motion.div
         style={{
           y: charY,
@@ -118,15 +118,15 @@ export default function Hero() {
           opacity: charOpacity,
           willChange: "transform",
         }}
-        className="pointer-events-none absolute inset-y-0 right-0 z-[3] hidden w-[48%] items-center justify-center lg:flex"
+        className="pointer-events-none absolute inset-y-0 right-0 z-[3] hidden w-[44%] items-center justify-center opacity-70 md:flex lg:w-[48%] lg:opacity-100"
       >
-        <OrbitalVisual />
+        <OrbitalVisual reduce={!!reduce} />
       </motion.div>
 
       {/* ── text content ── */}
       <motion.div
         style={{ opacity: textOpacity, y: textY, willChange: "transform" }}
-        className="relative z-[5] flex min-h-[100svh] w-full flex-col justify-center px-8 py-28 md:px-16 xl:px-24"
+        className="relative z-[5] flex min-h-[100svh] w-full flex-col justify-center px-6 py-28 md:px-10 xl:px-24"
       >
         <h1 className="sr-only">{profile.name} — {profile.role}</h1>
 
@@ -135,7 +135,7 @@ export default function Hero() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.7, ease: EASE }}
-          className="mb-6 flex items-center gap-3 font-mono text-[10px] tracking-[0.42em] uppercase text-ink-mute"
+          className="mb-6 flex items-center gap-3 font-mono text-[11px] tracking-[0.32em] uppercase text-ink-mute"
         >
           <span className="h-px w-8 bg-line-strong" />
           <span>AI Engineer · Researcher</span>
@@ -143,8 +143,8 @@ export default function Hero() {
 
         {/* name + role */}
         <motion.div
-          initial={{ x: -180, opacity: 0, filter: "blur(18px)" }}
-          animate={{ x: 0, opacity: 1, filter: "blur(0px)" }}
+          initial={{ x: -180, opacity: 0, scale: 0.98 }}
+          animate={{ x: 0, opacity: 1, scale: 1 }}
           transition={{ delay: 0.35, duration: 1.1, ease: EASE }}
           aria-hidden
           className="select-none"
@@ -153,7 +153,7 @@ export default function Hero() {
             className="font-display font-black leading-[0.86] tracking-[-0.045em] text-[clamp(52px,8vw,124px)]"
             style={{
               color: NEON_BLUE,
-              textShadow: "0 1px 24px rgba(110,193,255,0.22)",
+              textShadow: "0 1px 24px rgba(124,192,255,0.22)",
             }}
           >
             PRASIDDHA
@@ -168,8 +168,8 @@ export default function Hero() {
 
         {/* tagline */}
         <motion.p
-          initial={{ opacity: 0, y: 14, filter: "blur(8px)" }}
-          animate={{ opacity: 1, y: 0, filter: "blur(0)" }}
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.7, duration: 1.0, ease: EASE }}
           className="mt-6 max-w-md font-display text-[15px] leading-relaxed text-ink-dim md:text-[17px]"
         >
@@ -200,20 +200,24 @@ export default function Hero() {
           transition={{ delay: 1.1, duration: 0.8, ease: EASE }}
           className="mt-8 flex flex-wrap items-center gap-4"
         >
-          {/* Primary — glowing gradient pill */}
+          {/* Primary — glowing gradient pill with sheen sweep */}
           <a
             href="#projects"
-            data-cursor="hover"
-            className="group relative inline-flex items-center gap-3 overflow-hidden rounded-full px-8 py-3.5 font-display text-[13px] font-semibold tracking-wide text-white transition-transform duration-200 ease-out hover:scale-[1.06]"
+            className="group relative inline-flex items-center gap-3 overflow-hidden rounded-full px-8 py-3.5 font-display text-[13px] font-semibold tracking-wide text-white transition-transform duration-200 ease-out hover:scale-[1.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue/60"
             style={{
               background:
                 "linear-gradient(135deg, #4f9eff 0%, #6EC1FF 42%, #b794f4 100%)",
               boxShadow:
-                "0 0 0 1px rgba(255,255,255,0.18) inset, 0 8px 36px rgba(110,193,255,0.32), 0 2px 8px rgba(0,0,0,0.45)",
+                "0 0 0 1px rgba(255,255,255,0.18) inset, 0 8px 36px rgba(124,192,255,0.32), 0 2px 8px rgba(0,0,0,0.45)",
             }}
           >
-            <span>View Projects</span>
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/25 text-[13px] transition-transform duration-200 group-hover:translate-x-0.5">
+            {/* sheen */}
+            <span
+              aria-hidden
+              className="pointer-events-none absolute inset-y-0 -left-1/3 w-1/3 -skew-x-[20deg] bg-white/25 blur-md -translate-x-[200%] transition-transform duration-700 ease-out group-hover:translate-x-[420%]"
+            />
+            <span className="relative">View Projects</span>
+            <span className="relative flex h-6 w-6 items-center justify-center rounded-full bg-white/25 text-[13px] transition-transform duration-200 group-hover:translate-x-0.5">
               →
             </span>
           </a>
@@ -223,24 +227,21 @@ export default function Hero() {
             className="rounded-full p-px"
             style={{
               background:
-                "linear-gradient(135deg, rgba(110,193,255,0.55) 0%, rgba(183,148,244,0.3) 50%, rgba(255,255,255,0.08) 100%)",
+                "linear-gradient(135deg, rgba(124,192,255,0.55) 0%, rgba(183,148,244,0.3) 50%, rgba(255,255,255,0.08) 100%)",
             }}
           >
             <a
               href="#contact"
-              data-cursor="hover"
-              className="group inline-flex items-center gap-2.5 rounded-full px-8 py-3.5 font-display text-[13px] font-medium tracking-wide text-white/80 backdrop-blur-md transition-transform duration-200 ease-out hover:text-white hover:scale-[1.04]"
+              className="group inline-flex items-center gap-2.5 rounded-full px-8 py-3.5 font-display text-[13px] font-medium tracking-wide text-white/80 transition-transform duration-200 ease-out hover:text-white hover:scale-[1.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue/60"
               style={{ background: "rgba(4,6,14,0.88)" }}
             >
               Contact Me
-              <span className="text-[15px] leading-none text-white/40 transition-transform duration-200 group-hover:text-white/90 group-hover:translate-x-0.5">
+              <span className="text-[15px] leading-none text-white/40 transition-all duration-200 group-hover:text-white/90 group-hover:translate-x-0.5">
                 ↗
               </span>
             </a>
           </div>
         </motion.div>
-
-
       </motion.div>
 
       {/* ── scroll indicator ── */}
@@ -255,7 +256,7 @@ export default function Hero() {
             style={{
               background: `linear-gradient(180deg, transparent, ${NEON_BLUE})`,
             }}
-            animate={{ y: ["-100%", "200%"] }}
+            animate={reduce ? false : { y: ["-100%", "200%"] }}
             transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
           />
         </div>
@@ -269,13 +270,11 @@ export default function Hero() {
 }
 
 /* ─────────────────────────────────────────────────────────────
-   ORBITAL VISUAL — pure CSS/transform animation. Only `rotate`
-   transforms are animated (GPU-composited, no layout, no JS per
-   frame), so it stays buttery smooth. A glowing core with three
-   tilted orbital rings, each carrying an orbiting node.
+   ORBITAL VISUAL — pure transform animation (GPU-composited).
+   Glowing core with three tilted orbital rings, each carrying an
+   orbiting node. Honors prefers-reduced-motion.
    ───────────────────────────────────────────────────────────── */
-function OrbitalVisual() {
-  // palette matches site tokens: blue (#5aa9ff/#7cc0ff) + orange (#ff6a3d/#ff8a5b)
+function OrbitalVisual({ reduce }: { reduce: boolean }) {
   const rings = [
     { size: 460, dur: 26, dir: 1,  tilt: 68, node: "#7cc0ff" },
     { size: 340, dur: 18, dir: -1, tilt: 74, node: "#5aa9ff" },
@@ -287,10 +286,10 @@ function OrbitalVisual() {
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ delay: 0.4, duration: 1.2, ease: EASE }}
-      className="relative flex h-[560px] w-[560px] items-center justify-center"
+      className="relative flex h-[min(82vmin,560px)] w-[min(82vmin,560px)] items-center justify-center"
       style={{ perspective: 900 }}
     >
-      {/* ambient glow behind — blue core with a warm orange edge */}
+      {/* ambient glow */}
       <div
         aria-hidden
         className="absolute inset-0 rounded-full blur-[70px]"
@@ -309,7 +308,7 @@ function OrbitalVisual() {
           boxShadow:
             "0 0 60px 6px rgba(90,169,255,0.5), 0 0 120px 24px rgba(90,169,255,0.16)",
         }}
-        animate={{ scale: [1, 1.06, 1] }}
+        animate={reduce ? false : { scale: [1, 1.06, 1] }}
         transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
       />
 
@@ -332,10 +331,9 @@ function OrbitalVisual() {
               borderWidth: 1,
               willChange: "transform",
             }}
-            animate={{ rotate: r.dir * 360 }}
+            animate={reduce ? false : { rotate: r.dir * 360 }}
             transition={{ duration: r.dur, repeat: Infinity, ease: "linear" }}
           >
-            {/* orbiting node */}
             <span
               className="absolute left-1/2 top-0 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full"
               style={{
@@ -350,9 +348,7 @@ function OrbitalVisual() {
   );
 }
 
-/* ─── Film-grain overlay — baked into a tiled data-URI so the
-   feTurbulence filter is rasterized ONCE by the browser instead
-   of recomputed every frame over the full viewport. ─── */
+/* ─── Film-grain overlay — baked into a tiled data-URI ─── */
 const GRAIN_URI =
   "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")";
 

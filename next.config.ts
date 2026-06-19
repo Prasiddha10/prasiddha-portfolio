@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   experimental: {
-    optimizePackageImports: ["framer-motion", "gsap"],
+    optimizePackageImports: ["framer-motion"],
   },
 };
 

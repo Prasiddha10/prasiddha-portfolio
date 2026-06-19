@@ -6,7 +6,7 @@
   --color-fg: #ffffff;
   --color-ink: #f5f5f7;
   --color-ink-dim: rgba(255, 255, 255, 0.62);
-  --color-ink-mute: rgba(255, 255, 255, 0.4);
+  --color-ink-mute: rgba(255, 255, 255, 0.6);
   --color-line: rgba(255, 255, 255, 0.08);
   --color-line-strong: rgba(255, 255, 255, 0.16);
   --color-orange: #ff6a3d;
@@ -61,11 +61,53 @@
     color: var(--color-bg);
   }
 
+  /* keyboard focus ring — follows element, respects high-contrast */
+  :focus-visible {
+    outline: 2px solid var(--color-blue);
+    outline-offset: 2px;
+  }
+  @media (forced-colors: active) {
+    :focus-visible {
+      outline-color: Highlight;
+    }
+  }
+
 }
 
 @layer utilities {
   .font-display { font-family: var(--font-display); }
   .font-mono { font-family: var(--font-mono); }
+  .font-accent { font-family: var(--font-anton), Impact, "Arial Black", sans-serif; }
+
+  /* shared display type scale — keeps heading hierarchy consistent */
+  .display-2xl {
+    font-family: var(--font-display);
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    line-height: 0.9;
+    font-size: clamp(56px, 10vw, 150px);
+  }
+  .display-xl {
+    font-family: var(--font-display);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 0.95;
+    font-size: clamp(40px, 7vw, 96px);
+  }
+  .display-lg {
+    font-family: var(--font-display);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    font-size: clamp(32px, 5vw, 64px);
+  }
+  .display-md {
+    font-family: var(--font-display);
+    font-weight: 800;
+    letter-spacing: -0.015em;
+    line-height: 1.02;
+    font-size: clamp(28px, 4vw, 52px);
+  }
 
   .text-gradient-warm {
     background: linear-gradient(120deg, var(--color-orange) 0%, var(--color-orange-2) 100%);
@@ -91,15 +133,15 @@
   }
 
   .glass {
-    background: rgba(20, 20, 28, 0.48);
-    backdrop-filter: blur(14px) saturate(140%);
-    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    background: rgba(20, 20, 28, 0.52);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
     border: 1px solid var(--color-line);
   }
   .glass-strong {
-    background: rgba(10, 10, 14, 0.7);
-    backdrop-filter: blur(20px) saturate(150%);
-    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    background: rgba(10, 10, 14, 0.78);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
     border: 1px solid var(--color-line-strong);
   }
 
@@ -146,6 +188,11 @@
     border-radius: 8px;
   }
   ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.15); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); opacity: 0.25; }
+  50%       { transform: translateY(-22px); opacity: 0.85; }
 }
 
 @media (prefers-reduced-motion: reduce) {

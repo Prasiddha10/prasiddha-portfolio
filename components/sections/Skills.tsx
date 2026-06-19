@@ -3,8 +3,14 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 import SectionHeader from "@/components/ui/SectionHeader";
-import { skills } from "@/lib/data";
+import { skills, type SkillItem } from "@/lib/data";
 import { cn } from "@/lib/utils";
+
+function normalize(item: SkillItem): { name: string; primary: boolean } {
+  return typeof item === "string"
+    ? { name: item, primary: false }
+    : { name: item.name, primary: !!item.primary };
+}
 
 export default function Skills() {
   return (
@@ -19,6 +25,14 @@ export default function Skills() {
             </>
           }
         />
+
+        {/* focal micro-stat strip */}
+        <div className="mb-12 flex flex-wrap gap-x-8 gap-y-3 font-mono text-[11px] tracking-[0.18em] uppercase text-ink-mute">
+          <span><span className="text-blue">6</span> stacks</span>
+          <span><span className="text-blue">30+</span> tools</span>
+          <span><span className="text-orange">4</span> vector DBs</span>
+          <span><span className="text-orange">RAG</span> · NLP focus</span>
+        </div>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {skills.map((group, gi) => (
@@ -66,9 +80,18 @@ function SkillGroup({
       </div>
 
       <div className="flex flex-wrap gap-2">
-        {group.items.map((item, i) => (
-          <SkillBadge key={item} item={item} delay={i * 0.04} accent={group.accent} />
-        ))}
+        {group.items.map((item, i) => {
+          const { name, primary } = normalize(item);
+          return (
+            <SkillBadge
+              key={name}
+              item={name}
+              primary={primary}
+              delay={i * 0.04}
+              accent={group.accent}
+            />
+          );
+        })}
       </div>
     </motion.div>
   );
@@ -76,10 +99,12 @@ function SkillGroup({
 
 function SkillBadge({
   item,
+  primary,
   delay,
   accent,
 }: {
   item: string;
+  primary: boolean;
   delay: number;
   accent: "orange" | "blue";
 }) {
@@ -91,13 +116,27 @@ function SkillBadge({
       whileHover={{ scale: 1.08, y: -2 }}
       transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1], delay }}
       className={cn(
-        "inline-flex select-none cursor-default items-center rounded-full border px-3.5 py-1.5 font-mono text-[11px] tracking-[0.08em] transition-colors duration-300",
+        "inline-flex select-none cursor-default items-center rounded-full border transition-colors duration-300",
+        primary
+          ? "px-4 py-2 font-mono text-[12px] font-medium tracking-[0.06em] text-ink"
+          : "px-3.5 py-1.5 font-mono text-[11px] tracking-[0.08em] text-ink-dim",
         accent === "blue"
-          ? "border-line-strong text-ink-dim hover:text-blue hover:border-blue/50"
-          : "border-line-strong text-ink-dim hover:text-orange hover:border-orange/50"
+          ? primary
+            ? "border-blue/40 hover:border-blue/60"
+            : "border-line-strong hover:text-blue hover:border-blue/50"
+          : primary
+          ? "border-orange/40 hover:border-orange/60"
+          : "border-line-strong hover:text-orange hover:border-orange/50"
       )}
-      data-cursor="hover"
     >
+      {primary && (
+        <span
+          className={cn(
+            "mr-2 h-1.5 w-1.5 rounded-full",
+            accent === "blue" ? "bg-blue" : "bg-orange"
+          )}
+        />
+      )}
       {item}
     </motion.span>
   );

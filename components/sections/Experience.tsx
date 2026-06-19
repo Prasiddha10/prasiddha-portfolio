@@ -19,6 +19,7 @@ export default function Experience() {
         <SectionHeader
           index="02"
           eyebrow="Experience"
+          accent="cool"
           title={
             <>
               My <span className="text-gradient-cool">Journey</span>
@@ -35,6 +36,12 @@ export default function Experience() {
                 height: lineHeight,
                 background: "linear-gradient(180deg, #5aa9ff 0%, #ff6a3d 100%)",
               }}
+            />
+            {/* terminal orb — caps the rail */}
+            <span
+              aria-hidden
+              className="absolute -bottom-1.5 left-1/2 h-3 w-3 -translate-x-1/2 rounded-full bg-orange"
+              style={{ boxShadow: "0 0 16px 3px rgba(255,106,61,0.6)" }}
             />
           </div>
 
@@ -62,11 +69,22 @@ function TimelineRow({ exp, index }: { exp: Exp; index: number }) {
       {/* dot */}
       <div className="relative">
         <div className="absolute left-[22px] md:left-[154px] top-2 grid h-3.5 w-3.5 place-items-center rounded-full bg-bg">
-          <span className="h-3.5 w-3.5 rounded-full border-2 border-blue" style={{ boxShadow: "0 0 0 4px rgba(90,169,255,0.12)" }} />
+          {index === 0 && (
+            <span className="absolute inset-0 rounded-full border-2 border-blue opacity-60 motion-safe:animate-ping" />
+          )}
+          <span
+            className="h-3.5 w-3.5 rounded-full border-2 border-blue"
+            style={{ boxShadow: "0 0 0 4px rgba(90,169,255,0.12)" }}
+          />
         </div>
         <div className="font-mono text-[11px] tracking-[0.15em] uppercase text-ink-dim pt-1">
           {exp.year}
         </div>
+        {index === 0 && (
+          <div className="mt-1 inline-flex items-center gap-1.5 font-mono text-[9px] tracking-[0.2em] uppercase text-blue">
+            <span className="h-1 w-1 rounded-full bg-blue" /> Now
+          </div>
+        )}
       </div>
 
       {/* card */}

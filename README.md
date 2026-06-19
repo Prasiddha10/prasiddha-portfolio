@@ -27,9 +27,8 @@ app/
   api/contact/route.ts    # POST endpoint, validates + rate-limits + persists JSONL
 components/
   providers/              # Lenis (smooth scroll), global wrappers
-  ui/                     # Cursor, Nav, MagneticButton, WordsReveal, LoadingScreen, BackgroundFX
-  three/HeroScene.tsx     # R3F: humanoid 'boy' character + sparkles + stars
-  sections/               # Hero · About · Experience · Projects · Skills · Education · Contact
+  ui/                     # Nav, MagneticButton, SectionHeader, ScrollProgress, BackgroundFX
+  sections/               # Hero · About · Experience · Projects · Pipeline · Skills · Education · Contact
 lib/
   data.ts                 # all portfolio content (edit me!)
   utils.ts                # cn(), easing

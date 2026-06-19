@@ -53,11 +53,15 @@ export default function About() {
             {STATEMENT.map((line, i) => (
               <span key={i} className="block overflow-hidden">
                 <motion.span
-                  initial={{ y: "110%", opacity: 0, filter: "blur(14px)" }}
-                  animate={inView ? { y: "0%", opacity: 1, filter: "blur(0px)" } : {}}
+                  initial={{ y: "110%", opacity: 0 }}
+                  animate={inView ? { y: "0%", opacity: 1 } : {}}
                   transition={{ delay: i * 0.08, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
                   className={`inline-block ${
-                    i <= LIT_UNTIL ? "text-gradient-warm" : "text-white/20"
+                    i <= LIT_UNTIL
+                      ? "text-gradient-warm"
+                      : i >= 7
+                      ? "text-gradient-cool"
+                      : "text-white/40"
                   }`}
                 >
                   {line}
